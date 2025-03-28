@@ -1,2 +1,3 @@
 streamlit
-pydantic>=1.8
+openai
+textblob

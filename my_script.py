@@ -7,18 +7,29 @@ from textblob import TextBlob
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 def generate_questions_with_openai(tech_stack, experience, desired_position, conversation_history):
-    """Generates technical interview questions using OpenAI's GPT model based on user input and conversation history."""
+    """
+    Generates technical interview questions using OpenAI's GPT model based on user input and conversation history.
+
+    Args:
+        tech_stack (str): The tech stack specified by the user.
+        experience (int): The years of experience specified by the user.
+        desired_position (str): The desired position specified by the user.
+        conversation_history (str): The conversation history.
+
+    Returns:
+        list: A list of generated technical interview questions.
+        str: An error message if question generation fails.
+    """
     try:
         prompt = (f"Based on the following conversation: {conversation_history}\n"
                   f"Generate 5 technical interview questions for a {desired_position} role "
                   f"with {experience} years of experience in {tech_stack}.")
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful interviewer."},
                 {"role": "user", "content": prompt}
             ],
-            n=1,
             max_tokens=250,  # Increased max_tokens for longer questions
             temperature=0.7
         )
@@ -26,16 +37,25 @@ def generate_questions_with_openai(tech_stack, experience, desired_position, con
         questions = [q.strip() for q in questions_text.split("\n") if q.strip()]
         return questions[:5]
     except Exception as e:
-        st.error(f"Error generating questions: {e}. Please try again.")
-        return []
+        return f"Error generating questions: {e}. Please try again."
 
 def analyze_sentiment(text):
-    """Analyzes the sentiment of a given text."""
+    """
+    Analyzes the sentiment of a given text.
+
+    Args:
+        text (str): The text to analyze.
+
+    Returns:
+        float: The sentiment polarity of the text.
+    """
     blob = TextBlob(text)
     return blob.sentiment.polarity
 
 def main():
-    """Main function to run the Streamlit application."""
+    """
+    Main function to run the Streamlit application.
+    """
     st.title("TalentScout Hiring Assistant")
     st.write("Welcome! Please provide your details to proceed.")
 
@@ -83,11 +103,13 @@ def main():
             if tech_stack and desired_position:
                 st.write(f"Generating technical questions based on {tech_stack}...")
                 questions = generate_questions_with_openai(tech_stack, experience, desired_position, st.session_state.conversation)
-                if questions:
+                if isinstance(questions, list): #check if questions is a list, if not, it is an error message.
                     st.markdown("<h3 style='color: blue;'>Technical Questions:</h3>", unsafe_allow_html=True)
                     for i, q in enumerate(questions):
                         st.write(f"{i+1}. {q}")
                         st.session_state.conversation += f"Assistant: {q}\n"
+                else:
+                    st.error(questions) #display error message.
 
     if st.button("See Previous Inputs"):
         if st.session_state.history:
@@ -109,7 +131,7 @@ def main():
             st.stop()
         else:
             try:
-                response = openai.ChatCompletion.create(
+                response = openai.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are a helpful interviewer."},
