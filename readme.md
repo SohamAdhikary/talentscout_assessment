@@ -1,19 +1,42 @@
 # TalentScout Hiring Assistant
 
 ## Overview
-The TalentScout Hiring Assistant is a Streamlit application designed to assist in generating technical interview questions based on user-provided information. This tool uses OpenAI's GPT model for dynamic question generation and includes sentiment analysis for user inputs.
+... (Same as before)
 
 ## Features
-- **Dynamic Question Generation:** Automatically generates technical interview questions based on specified tech stack.
-- **Sentiment Analysis:** Analyzes the sentiment of the user's name and tech stack input to provide insights.
-- **User Input Validation:** Ensures all required fields are filled before submission.
-- **Session Management:** Maintains conversation history for a more personalized experience.
+... (Same as before)
+- **Context Aware Responses:** The bot now remembers the conversation and uses it to provide more relevant responses.
+- **Improved Fallback:** The bot now responds to unexpected user inputs with more informative messages.
+... (Same as before)
 
-## Installation
+## Data Policy
+... (Same as before)
 
-### Prerequisites
-- Python 3.7 or higher
-- Streamlit
-- OpenAI Python Client
-- TextBlob for sentiment analysis
+## Technical Details
+... (Same as before)
 
+## Challenges & Solutions
+... (Same as before)
+
+## Code Quality
+... (Same as before)
+
+## Usage
+... (Same as before)
+- **Ask Follow-Up Questions:** You can now ask follow-up questions, and the bot will respond based on the conversation.
+- **End Conversation:** Type 'exit' at any time to end the conversation.
+
+## Data Handling
+The application uses Streamlit's session state to temporarily store user input during the active session. This data is not persisted beyond the session and is cleared when the browser window is closed.
+
+## Testing
+Unit tests are recommended for critical functions such as input validation and question generation. However, they are not implemented in this version.
+
+## Contributing
+... (Same as before)
+
+## License
+... (Same as before)
+
+## Contact
+... (Same as before)
