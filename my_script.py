@@ -10,7 +10,7 @@ def generate_questions_with_openai(tech_stack, experience, desired_position, con
     """Generates technical interview questions using OpenAI's GPT model based on user input and conversation history."""
     try:
         prompt = (f"Based on the following conversation: {conversation_history}\n"
-                  f"Generate 3 technical interview questions for a {desired_position} role "
+                  f"Generate 5 technical interview questions for a {desired_position} role "
                   f"with {experience} years of experience in {tech_stack}.")
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -19,12 +19,12 @@ def generate_questions_with_openai(tech_stack, experience, desired_position, con
                 {"role": "user", "content": prompt}
             ],
             n=1,
-            max_tokens=150,
+            max_tokens=250,  # Increased max_tokens for longer questions
             temperature=0.7
         )
         questions_text = response.choices[0].message.content.strip()
         questions = [q.strip() for q in questions_text.split("\n") if q.strip()]
-        return questions[:5]  # Limit to 5 questions
+        return questions[:5]
     except Exception as e:
         st.error(f"Error generating questions: {e}. Please try again.")
         return []
@@ -58,7 +58,17 @@ def main():
             st.error("Please fill in all required fields.")
         else:
             sentiment_score = analyze_sentiment(full_name)
-            st.write(f"Sentiment analysis score of your name: {sentiment_score:.2f}")
+            st.markdown("<h3 style='color: green;'>Information Submitted Successfully!</h3>", unsafe_allow_html=True)
+            st.markdown("<p>Reviewing Details...</p>", unsafe_allow_html=True)
+            st.write(f"Sentiment Analysis: {'Positive' if sentiment_score > 0 else 'Negative' if sentiment_score < 0 else 'Neutral'} ({sentiment_score:.2f})")
+            st.write("Submitted Information:")
+            st.write(f"Full Name: {full_name}")
+            st.write(f"Email: {email}")
+            st.write(f"Phone: {phone}")
+            st.write(f"Years of Experience: {experience}")
+            st.write(f"Desired Position: {desired_position}")
+            st.write(f"Location: {location}")
+            st.write(f"Tech Stack: {tech_stack}")
             st.session_state.history.append({
                 "full_name": full_name,
                 "email": email,
@@ -68,25 +78,22 @@ def main():
                 "location": location,
                 "tech_stack": tech_stack
             })
-            st.success("Your information has been submitted successfully.")
-
-            # Update conversation history
             st.session_state.conversation += f"User: Name={full_name}, Tech={tech_stack}, Position={desired_position}.\n"
 
-            # Generate questions only if tech_stack and desired_position are provided
             if tech_stack and desired_position:
+                st.write(f"Generating technical questions based on {tech_stack}...")
                 questions = generate_questions_with_openai(tech_stack, experience, desired_position, st.session_state.conversation)
                 if questions:
-                    st.write("Technical Questions:")
-                    for q in questions:
-                        st.write(f"- {q}")
-                        st.session_state.conversation += f"Assistant: {q}\n" #Update conversation with question.
+                    st.markdown("<h3 style='color: blue;'>Technical Questions:</h3>", unsafe_allow_html=True)
+                    for i, q in enumerate(questions):
+                        st.write(f"{i+1}. {q}")
+                        st.session_state.conversation += f"Assistant: {q}\n"
 
     if st.button("See Previous Inputs"):
         if st.session_state.history:
-            st.write("Previous Entries:")
+            st.markdown("<h3 style='color: purple;'>Previous Entries:</h3>", unsafe_allow_html=True)
             for entry in st.session_state.history:
-                st.write(f"{entry['full_name']} - {entry['tech_stack']} ({entry['desired_position']})")
+                st.write(f"Name: {entry['full_name']}, Tech: {entry['tech_stack']}, Position: {entry['desired_position']}")
         else:
             st.write("No previous entries found.")
 
@@ -96,7 +103,6 @@ def main():
     if full_name:
         st.write(f"Hello, {full_name}! Let's get started.")
 
-    # Fallback Mechanism for unexpected user input.
     user_input = st.text_input("Ask a follow up question or type 'exit'.")
     if user_input:
         if "exit" in user_input.lower():
@@ -109,17 +115,15 @@ def main():
                         {"role": "system", "content": "You are a helpful interviewer."},
                         {"role": "user", "content": f"{st.session_state.conversation}\nUser: {user_input}"}
                     ],
-                    max_tokens=150,
+                    max_tokens=200,
                     temperature=0.7
                 )
                 bot_response = response.choices[0].message.content.strip()
-                st.write(bot_response)
+                st.write(f"User Question: {user_input}")
+                st.write(f"Bot Response: {bot_response}")
                 st.session_state.conversation += f"User: {user_input}\nAssistant: {bot_response}\n"
             except Exception as e:
                 st.error(f"Error: {e}. I am unable to process your request.")
-
-# Data Handling: Streamlit session state is cleared on browser close.
-# No explicit data storage is implemented beyond session state.
 
 if __name__ == "__main__":
     main()
